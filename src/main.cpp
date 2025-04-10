@@ -14,7 +14,7 @@
 
 //---- Auxiliary Constants ----
 #define ADDRESS          "fc:58:fa:08:96:b5"
-#define DELAY_BETWEEN_OPEN  5000  // Milliseconds
+#define DELAY_BETWEEN_OPEN  2000  // Milliseconds
 #define DELAY_BETWEEN_READS 1000  // Milliseconds
 
 enum RFID_STATE
