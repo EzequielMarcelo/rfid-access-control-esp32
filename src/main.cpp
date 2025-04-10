@@ -112,6 +112,9 @@ void loop()
       case RFID_ADD_MASTER:
         if(rfid_read(address))
         {
+          if(card_is_registred(address))
+            remove_card(address);
+
           strcpy(currentSettings.masterCardAddress, address);
           Settings.Save(currentSettings);
           Serial.print("Nova tag ADM: ");
