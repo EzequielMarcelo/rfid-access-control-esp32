@@ -21,11 +21,10 @@ bool SettingsManager::Load(settings_t *settings)
     }
     
     file.read((uint8_t*)settings->masterCardAddress, sizeof(settings->masterCardAddress));
-
-    for (uint8_t card = 0; card < MAX_CARDS; card++) 
-        file.read((uint8_t*)settings->cardAddress[card], sizeof(settings->cardAddress[card]));
-    
     file.read((uint8_t*)&settings->card_amount, sizeof(settings->card_amount));
+
+    for (uint8_t card = 0; card < settings->card_amount; card++) 
+        file.read((uint8_t*)settings->cardAddress[card], sizeof(settings->cardAddress[card]));
 
     file.close();
 
@@ -42,11 +41,11 @@ bool SettingsManager::Save(settings_t settings)
     }
     
     file.write((uint8_t*)settings.masterCardAddress, sizeof(settings.masterCardAddress));
+    file.write((uint8_t*)&settings.card_amount, sizeof(settings.card_amount));
         
-    for (uint8_t card = 0; card < MAX_CARDS; card++) 
+    for (uint8_t card = 0; card < settings.card_amount; card++) 
         file.write((uint8_t*)settings.cardAddress[card], sizeof(settings.cardAddress[card]));
     
-    file.write((uint8_t*)&settings.card_amount, sizeof(settings.card_amount));
     file.close();
 
     Serial.println("Data written to file successfully");

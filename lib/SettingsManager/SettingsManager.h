@@ -9,8 +9,8 @@
 
 typedef struct 
 {
-    char masterCardAddress[20];
-    char cardAddress[MAX_CARDS][20];
+    char masterCardAddress[12];
+    char cardAddress[MAX_CARDS][12];
     uint8_t card_amount;
 }settings_t;
 
