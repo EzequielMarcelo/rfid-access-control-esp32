@@ -15,6 +15,7 @@
 //---- Auxiliary Constants ----
 #define ADDRESS          "fc:58:fa:08:96:b5"
 #define DELAY_BETWEEN_OPEN  5000  // Milliseconds
+#define DELAY_BETWEEN_READS 1000  // Milliseconds
 
 enum RFID_STATE
 {
@@ -61,14 +62,17 @@ void loop()
 {
   static int currentState = RFID_READ;
   char address[20];
+  static unsigned long timeLastRead = 0;
 
   if(!digitalRead(MASTER_PIN))
     currentState = RFID_ADD_MASTER;
   
-  switch (currentState)
-  {
-    case RFID_READ:
-      if(rfid_read(address))
+  if((millis() - timeLastRead) >= DELAY_BETWEEN_READS)
+    {
+    switch (currentState)
+    {
+      case RFID_READ:
+        if(rfid_read(address))
         {
           Serial.println(currentSettings.masterCardAddress);
           if(!strcmp(currentSettings.masterCardAddress, address))
@@ -77,25 +81,28 @@ void loop()
             currentState = RFID_ADD_OR_REMOVE_SLAVE;
           }
         }
-      break;
+        timeLastRead = millis();
+        
+        break;
 
-    case RFID_ADD_OR_REMOVE_SLAVE:
-      /* code */
-      break;
-    case RFID_ADD_MASTER:
-      if(rfid_read(address))
-      {
-        strcpy(currentSettings.masterCardAddress, address);
-        Settings.Save(currentSettings);
-        Serial.print("Nova tag ADM: ");
-        Serial.println(currentSettings.masterCardAddress);
+      case RFID_ADD_OR_REMOVE_SLAVE:
+        /* code */
+        break;
+      case RFID_ADD_MASTER:
+        if(rfid_read(address))
+        {
+          strcpy(currentSettings.masterCardAddress, address);
+          Settings.Save(currentSettings);
+          Serial.print("Nova tag ADM: ");
+          Serial.println(currentSettings.masterCardAddress);
+          currentState = RFID_READ;
+        }
+        break;
+    
+      default:
         currentState = RFID_READ;
+        break;
       }
-      break;
-  
-    default:
-      currentState = RFID_READ;
-      break;
   }
 }
 
