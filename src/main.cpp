@@ -58,8 +58,6 @@ void setup()
   if(!Settings.Load(&currentSettings))
     load_default_settings();
   
-  Serial.println(currentSettings.card_amount);
-  Serial.println(currentSettings.cardAddress[0]);
   Serial.println("Aproxime o seu cartao do leitor...");
   Serial.println();
 }
@@ -80,7 +78,6 @@ void loop()
       case RFID_READ:
         if(rfid_read(address))
         {
-          Serial.println(currentSettings.masterCardAddress);
           if(card_is_adm(address))
           {
             Serial.println("Modo cadastro");
