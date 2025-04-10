@@ -74,7 +74,7 @@ void loop()
     currentState = RFID_ADD_MASTER;
   
   if((millis() - timeLastRead) >= DELAY_BETWEEN_READS)
-    {
+  {
     switch (currentState)
     {
       case RFID_READ:
@@ -110,8 +110,6 @@ void loop()
 
           else
             remove_card(address);
-        
-          currentState = RFID_READ;
         }
         break;
       case RFID_ADD_MASTER:
