@@ -38,7 +38,8 @@ void open_door();
 void load_default_settings(); 
 void add_card(const char *address);
 bool card_is_registred(const char *address);   
-bool card_is_adm(const char *address);                 
+bool card_is_adm(const char *address); 
+void remove_card(const char *address);                
 
 void setup() 
 {
@@ -105,9 +106,11 @@ void loop()
             return;
           }
           if(!card_is_registred(address))
-          {
             add_card(address);
-          }
+
+          else
+            remove_card(address);
+        
           currentState = RFID_READ;
         }
         break;
@@ -218,4 +221,35 @@ bool card_is_adm(const char *address)
     return true;
   
   return false;
+}
+
+void remove_card(const char *address)
+{
+  bool success = false;
+
+  Serial.print("Removendo cartão: ");
+  Serial.println(address);
+
+  for(uint8_t card_remove = 0; card_remove < currentSettings.card_amount; card_remove++)
+  {
+    if(!strcmp(currentSettings.cardAddress[card_remove], address))
+    {
+      success = true;
+
+      for(uint8_t card = card_remove; card < currentSettings.card_amount - 1; card++)
+      {
+        strncpy(currentSettings.cardAddress[card], currentSettings.cardAddress[card + 1], sizeof(currentSettings.cardAddress[card]) - 1);
+        currentSettings.cardAddress[card][sizeof(currentSettings.cardAddress[card]) - 1] = '\0';
+      }
+
+      currentSettings.card_amount--;
+      Settings.Save(currentSettings);
+
+      Serial.println("Cartão removido com sucesso.");
+      break;
+    }
+  }
+
+  if(!success)
+    Serial.println("Cartão não encontrado.");
 }
