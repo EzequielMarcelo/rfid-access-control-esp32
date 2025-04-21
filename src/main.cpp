@@ -24,6 +24,13 @@ enum RFID_STATE
   RFID_ADD_MASTER
 };
 
+enum SEARCH_STATE
+{
+  SCANNER = 0,
+  CHECK_IF_DEVICE_REGISTERED,
+  CONNECTED
+};
+
 //---- Global Variables ----
 MFRC522 mfrc522(RFID_SS_PIN, RFID_RST_PIN); 
 BLEClientLibrary BLE;
@@ -39,7 +46,8 @@ void load_default_settings();
 void add_card(const char *address);
 bool card_is_registred(const char *address);   
 bool card_is_adm(const char *address); 
-void remove_card(const char *address);                
+void remove_card(const char *address);  
+void BLE_routine();              
 
 void setup() 
 {
@@ -67,6 +75,8 @@ void loop()
   static int currentState = RFID_READ;
   char address[12];
   static unsigned long timeLastRead = 0;
+
+  BLE_routine();
 
   if(!digitalRead(MASTER_PIN))
     currentState = RFID_ADD_MASTER;
@@ -207,7 +217,7 @@ bool card_is_registred(const char *address)
     if(!strcmp(currentSettings.cardAddress[current_address], address))
     {
       success = true;
-      break;
+       break;
     }
   }
   return success;
@@ -250,4 +260,52 @@ void remove_card(const char *address)
 
   if(!success)
     Serial.println("Cartão não encontrado.");
+}
+void BLE_routine()
+{
+  static unsigned long timeLastLoop = 0;
+  static int search_status = SCANNER;
+
+  if((millis() - timeLastLoop) >= DELAY_BETWEEN_READS)
+  {
+    switch (search_status)
+    {
+      case SCANNER: 
+        Serial.println("Scaneando, aguarde...");
+        BLE.StartScan();  
+        if(BLE.GetFoundDevice())
+          search_status = CHECK_IF_DEVICE_REGISTERED;  
+        break;
+
+      case CHECK_IF_DEVICE_REGISTERED:
+        if(BLE.GetFoundDevice())
+        {
+          const char *address = BLE.GetFoundDevice()->getAddress().toString().c_str();
+          if(!strcmp(ADDRESS, address))
+          {
+            Serial.println("Conectando...");
+            BLE.Connect(BLE.GetFoundDevice());
+            search_status = CONNECTED;
+          }
+          else
+          {
+            search_status = SCANNER;      
+          }
+        }     
+        break;
+
+      case CONNECTED:
+        if(!BLE.GetFoundDevice())
+        {
+          Serial.println("Conexão perdida");
+          search_status = SCANNER;
+        }
+        break;
+          
+      default:
+        search_status = SCANNER;
+        break;
+    }
+    timeLastLoop = millis();  
+  }
 }
