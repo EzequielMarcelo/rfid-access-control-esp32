@@ -91,6 +91,7 @@ void loop()
           if(card_is_adm(address))
           {
             Serial.println("Modo cadastro");
+            digitalWrite(LED, HIGH);
             currentState = RFID_ADD_OR_REMOVE_SLAVE;
           }
           else if(card_is_registred(address))
@@ -110,6 +111,7 @@ void loop()
           if(card_is_adm(address))
           {
             currentState = RFID_READ;
+            digitalWrite(LED, LOW);
             return;
           }
           if(!card_is_registred(address))
@@ -180,10 +182,8 @@ void open_door()
 
   if((millis() - timeLastOpened) >= DELAY_BETWEEN_OPEN)
   {
-    digitalWrite(LED, HIGH);
     digitalWrite(LOCK, LOW);
-    delay(100);
-    digitalWrite(LED, LOW);  
+    delay(100); 
     digitalWrite(LOCK, HIGH); 
     timeLastOpened = millis();
   }
