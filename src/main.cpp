@@ -75,11 +75,24 @@ void loop()
   static int currentState = RFID_READ;
   char address[12];
   static unsigned long timeLastRead = 0;
+  static unsigned long timeLastPressedButton = 0;
+  static bool flagButton = false;
 
   BLE_routine();
 
-  if(!digitalRead(MASTER_PIN))
-    currentState = RFID_ADD_MASTER;
+  if (!digitalRead(MASTER_PIN))
+  {
+    if ((millis() - timeLastPressedButton >= 1000) && !flagButton) 
+    {
+      currentState = RFID_ADD_MASTER;
+      flagButton = true;
+    }
+  } 
+  else 
+  {
+    timeLastPressedButton = millis();
+    flagButton = false;
+  }
   
   if((millis() - timeLastRead) >= DELAY_BETWEEN_READS)
   {
