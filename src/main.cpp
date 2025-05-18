@@ -108,17 +108,14 @@ void loop()
       case RFID_ADD_OR_REMOVE_SLAVE:
         if(rfid_read(address))
         {
-          if(card_is_adm(address))
-          {
-            currentState = RFID_READ;
-            digitalWrite(LED, LOW);
-            return;
-          }
           if(!card_is_registred(address))
             add_card(address);
 
           else
             remove_card(address);
+          
+          currentState = RFID_READ;
+          digitalWrite(LED, LOW);
         }
         break;
       case RFID_ADD_MASTER:
